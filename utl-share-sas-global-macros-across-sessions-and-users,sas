@@ -1,0 +1,41 @@
+Share SAS global macros across sessions and users
+
+
+  Somewaat complicated
+
+    1. Open a sas session
+    2. Do the following
+       libname storemac "d:/sd1";
+       options mstored sasmstore=storemac ;
+
+       %macro globals(dummy)/des="sharded global macro variables" store source;
+         %global __one __two __tre;
+
+         %let __one=1;
+         %let __two=2;
+         %let __tre=3;
+
+       %mend globals;
+    3. Close the seesion because SAS has lock on storemac and
+       storemac cannot be closed and opened readonly.
+
+    4. Open two SAS sseeaions and run the code below
+
+       libname storemac "d:/sd1" access=readonly;
+       options mstored sasmstore=storemac ;
+
+       %globals;
+
+       %put __one;
+       %put __two;
+       %put __tre;
+       %let pgm=mds_100xtrPdf;
+
+       %globals;
+
+       %put &=__two;
+
+    5. In each session you should see
+
+       __two=2
+
